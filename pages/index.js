@@ -75,7 +75,7 @@ export default function PaginaInicial() {
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     backgroundColor: appConfig.theme.colors.primary[500],
                     backgroundImage: 'url(https://virtualbackgrounds.site/wp-content/uploads/2020/07/banana-taped-to-a-wall.jpg)',
-                    //backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundBlendMode: 'multiply',
+                    backgroundRepeat: 'no-repeat', backgroundSize: 'cover',
                 }}
             >
                 <Box
@@ -122,10 +122,10 @@ export default function PaginaInicial() {
                             label='Entrar'
                             fullWidth
                             buttonColors={{
-                                contrastColor: appConfig.theme.colors.neutrals["000"],
-                                mainColor: appConfig.theme.colors.primary[500],
-                                mainColorLight: appConfig.theme.colors.primary[400],
-                                mainColorStrong: appConfig.theme.colors.primary[600],
+                                contrastColor: appConfig.theme.colors.neutrals["999"],
+                                mainColor: appConfig.theme.colors.neutrals[200],
+                                mainColorLight: appConfig.theme.colors.neutrals[400],
+                                mainColorStrong: appConfig.theme.colors.neutrals['050'],
                             }}
                         />
                     </Box>
