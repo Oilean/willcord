@@ -2,15 +2,25 @@ import { Box, Text, TextField, Image, Button } from '@skynexui/components';
 import React from 'react';
 import appConfig from '../config.json';
 import { createClient } from '@supabase/supabase-js'
+import { useRouter } from 'next/router';
+import {ButtonSendSticker} from '../src/components/ButtonSendSticker'
 
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTY0MzM4NDYwMywiZXhwIjoxOTU4OTYwNjAzfQ.Ts6PZyPLT8EEZ4Rc-70fXgLsJl1fL59660Tts2t5eC4'
 const SUPABASE_URL = 'https://pwqrcwpbnuwwmpladkvv.supabase.co'
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-
-
+function escutaMensagensEmTempoReal(adicionaMensagem){
+    return supabaseClient
+        .from('mensagens')
+        .on('INSERT', (respostaLive) => {
+            adicionaMensagem(respostaLive.new);
+        })
+        .subscribe();
+}
 
 export default function ChatPage() {
+    const roteamento = useRouter();
+    const usuarioLogado = roteamento.query.username;
     const [mensagem, setMensagem] = React.useState('');
     const [listaDeMensagens, setListaDeMensagens] = React.useState([]);
 
@@ -20,9 +30,17 @@ export default function ChatPage() {
             .select('*')
             .order('id', { ascending: false })
             .then(({ data }) => {
-                console.log('Dados da consulta:', data);
+                //console.log('Dados da consulta:', data);
                 setListaDeMensagens(data);
             });
+        escutaMensagensEmTempoReal((novaMensagem) => {
+            setListaDeMensagens((valorAtualDaLista) =>{
+                return[
+                    novaMensagem,
+                    ...listaDeMensagens,
+                ]
+            });
+        });
     }, []);
 
     /*
@@ -39,7 +57,7 @@ export default function ChatPage() {
     function handleNovaMensagem(novaMensagem) {
         const mensagem = {
             // id: listaDeMensagens.length + 1,
-            de: 'oilean',
+            de: usuarioLogado,
             texto: novaMensagem,
         };
 
@@ -50,12 +68,8 @@ export default function ChatPage() {
                 mensagem
             ])
             .then(({ data }) => {
-                console.log('Criando mensagem: ', data);
-                setListaDeMensagens([
-
-                    data[0],
-                    ...listaDeMensagens,
-                ]);
+               //console.log('Criando mensagem: ', data);
+                
             });
 
         setMensagem('');
@@ -139,6 +153,12 @@ export default function ChatPage() {
                                 color: appConfig.theme.colors.neutrals[200],
                             }}
                         />
+                        <ButtonSendSticker 
+                            onStickerClick={(sticker)=>{
+                                //console.log(sticker)
+                                handleNovaMensagem(':sticker:'+sticker);
+                            }}
+                        />
                     </Box>
                 </Box>
             </Box>
@@ -165,12 +185,12 @@ function Header() {
 }
 
 function MessageList(props) {
-    console.log(props);
+    //console.log(props);
     return (
         <Box
             tag="ul"
             styleSheet={{
-                overflow: 'scroll',
+                overflow: 'auto',
                 display: 'flex',
                 flexDirection: 'column-reverse',
                 flex: 1,
@@ -221,7 +241,14 @@ function MessageList(props) {
                                 {(new Date().toLocaleDateString())}
                             </Text>
                         </Box>
-                        {mensagem.texto}
+                        {mensagem.texto.startsWith(':sticker:') 
+                        ? (
+                            <Image src={mensagem.texto.replace(':sticker:', '')}/>
+                        )
+                        :(
+                            mensagem.texto
+                        )}
+                        
                     </Text>
                 );
             })}
